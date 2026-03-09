@@ -12,12 +12,18 @@
 
 The recommended PSU is the **Mean Well LRS-200-24** (200W, 24V, 8.8A). For 230V regions, the **RSP-200-24** variant includes power factor correction and universal AC input. The LRS-200-24 has a physical **110V/230V selector switch** on the side — setting this incorrectly will destroy the PSU on first power-up.
 
-**Mains AC wiring** from the IEC C14 inlet to the PSU uses **16AWG (1.25mm²) minimum** stranded wire. Route Live (L) through the inlet's integrated fuse and rocker switch, then to the PSU L terminal. Neutral (N) goes directly to the PSU N terminal. Earth (PE/⏚) connects to the PSU earth terminal, then continues to the printer frame via a **serrated star washer** for reliable contact. Use **Wago 221-series** lever nuts for all AC junction points. Two important rules for Wagos: do **not** use ferrules — the contact spring needs to grip bare stranded wire directly, and a ferrule prevents this. And obey the **minimum strip length** printed on the side of the connector body — each variant (221-412, 221-413, etc.) specifies a different length, typically 11mm for the 2-conductor version.
+**Mains AC wiring** from the IEC C14 inlet to the PSU uses **16AWG (1.25mm²) minimum** stranded wire. **PE (⏚)** connects to the PSU PE terminal using whatever hardware the PSU ships with — no special washer needed there. The PE conductor then continues to the printer frame; at the frame end, a **serrated star washer** under the ring terminal is worthwhile because it bites through the anodizing on aluminum extrusions to ensure a low-resistance bond.
+
+**Use a double-pole (DPDT) rocker switch** — it interrupts both Live and Neutral simultaneously when switched off. Most Voron kits ship with a double-pole inlet assembly for exactly this reason. A single-pole switch only interrupts one conductor, and because the IEC C14 inlet is not inherently polarized (many international plugs are reversible), you cannot guarantee which side of the mains the single pole is breaking. This means Live wires may remain energized inside the printer even with the switch off. A single-pole switch will function electrically, but if you use one: **always physically unplug the printer before opening the electronics bay or touching any wiring**.
+
+The same caveat applies to **smart plugs and smart sockets** — most are single-pole switched internally, even if they appear to fully cut power. Switching off a smart socket does not make the printer safe to work inside. Always use the printer's own double-pole switch, or unplug the IEC cable, before doing any internal work.
+
+Route Live (L) through the inlet fuse and double-pole switch, then to the PSU L terminal. Neutral (N) through the second pole of the switch, then to the PSU N terminal. Use **Wago 221-series** lever nuts for all AC junction points. They accept bare stranded wire and solid core wire. Ferrules are not recommended — most ferrules are too short to reach correct insertion depth once the collar meets the connector body, and they can easily exceed the connector's maximum wire gauge. If a wire already has a ferrule crimped on, remove it first. Obey the **minimum strip length** printed on the side of the connector body — each variant (221-412, 221-413, etc.) specifies a different length, typically 11mm for the 2-conductor version.
 
 | AC Component | Wire Gauge | Connector |
 |---|---|---|
 | IEC C14 to PSU (L, N) | 16AWG min (14AWG preferred) | Spade terminals or Wago 221 |
-| Earth to frame | 16AWG | Ring terminal + serrated washer on M5 bolt |
+| PE (⏚) to frame | 16AWG | Ring terminal + serrated washer on M5 bolt |
 | IEC inlet fuse | 5A for 120V / 3A for 230V | Glass fuse, integrated in inlet |
 
 **24V DC distribution** from PSU to the Octopus Pro uses **16AWG silicone-jacketed wire**, approximately **30–40cm** for a typical 350 electronics bay layout. The Octopus Pro has three power input screw terminals that all share a common ground:
@@ -28,7 +34,9 @@ The recommended PSU is the **Mean Well LRS-200-24** (200W, 24V, 8.8A). For 230V 
 | **MOTOR_POWER** | DC 24V | Stepper driver power (supports up to 60V for HV drivers) | 16AWG |
 | **BED_IN** | DC 24V | Heated bed MOSFET output (unused with AC bed + SSR) | Not connected for AC bed |
 
-Connect **both PWR and MOTOR_POWER** positive terminals to PSU V+, and their ground terminals to PSU V−. Use **bootlace ferrules** on all wire ends entering screw terminals. For an AC heated bed, **BED_IN is left disconnected** — the SSR handles bed heating separately.
+Connect **both PWR and MOTOR_POWER** positive terminals to PSU V+, and their ground terminals to PSU V−. For an AC heated bed, **BED_IN is left disconnected** — the SSR handles bed heating separately.
+
+> ⚠️ **Terminal hardware**: The large power input terminals on the Octopus Pro (PWR, MOTOR_POWER) require **fork (spade) terminals**, not bootlace ferrules — the terminal design clamps a fork lug, not a ferrule barrel. All smaller signal and heater screw terminals on the board accept bootlace ferrules as normal.
 
 ### Onboard voltage regulators
 
@@ -36,7 +44,7 @@ The Octopus Pro v1.1 includes onboard DC-DC converters: **12V at 4A**, **5V at 8
 
 ### Grounding and safety
 
-**Frame grounding is mandatory.** Connect earth ground from the PSU PE terminal to the frame using **16AWG wire** with a ring terminal and serrated star washer. For AC heated beds, **ground the aluminum bed plate** independently — the Trident bed has an M4 mounting point specifically for the PE cable with serrated washer. If using multiple DC power supplies, connect all DC V− terminals together to establish a common voltage reference.
+**Frame PE bonding is mandatory.** Run a PE conductor from the PSU PE terminal to the frame using **16AWG wire** with a ring terminal and serrated star washer (the serrated washer bites through anodizing on the extrusion). For AC heated beds, **bond the aluminum bed plate to PE** independently — the Trident bed has an M4 mounting point specifically for this, also with a serrated washer. If using multiple DC power supplies, connect all DC V− terminals together to establish a common voltage reference.
 
 ---
 
@@ -46,7 +54,9 @@ A 350×350mm Voron Trident requires an **AC silicone heater pad rated at 650–7
 
 ### SSR selection and wiring
 
-Use a quality SSR: **Omron G3NA-210B-DC5** (10A) or **Crydom D2425** (25A). Cheap counterfeit SSRs can fail in the closed position, causing uncontrolled heating and fire. Mount the SSR on a **metal bracket with thermal compound** for heat dissipation.
+Use a quality SSR: **Omron G3NA-210B-DC5** or **Crydom D2425**. Cheap counterfeit SSRs can fail in the closed position, causing uncontrolled heating and fire. Mount the SSR on a **metal bracket for passive cooling** — no thermal compound is needed or recommended.
+
+> ⚠️ **Current derating**: The Omron G3NA-210B is rated 10A on the box, but that rating assumes active (forced air) cooling. Passively cooled on a bracket it **derates to 4A continuous**. For a 750W/120V bed (6.25A draw) this means you must limit bed power in Klipper. Set `max_power: 0.64` in `[heater_bed]` to cap duty cycle and keep average current within the 4A passive rating. If you want to run the bed at full power, use the Crydom D2425 (25A) instead.
 
 **DC control side** (low voltage, from Octopus Pro):
 
@@ -61,13 +71,13 @@ Use a quality SSR: **Omron G3NA-210B-DC5** (10A) or **Crydom D2425** (25A). Chea
 - SSR AC output terminal (pin 2) → bed heater Live wire
 - AC Neutral connects directly to bed heater (bypasses SSR)
 - **Wire gauge**: **14AWG minimum** (12AWG recommended for 120V/750W = 6.25A)
-- Route AC wires separately from DC wiring; use Wago 221 connectors for junctions (bare wire only, no ferrules; observe strip length marked on connector side)
+- Route AC wires separately from DC wiring; use Wago 221 connectors for junctions (bare wire or solid core; ferrules not recommended — remove if present; observe strip length marked on connector side)
 
-**Klipper configuration**: In `[heater_bed]`, set `heater_pin: PA3`. Calculate `max_power` as SSR continuous rating divided by actual bed current. For the Omron G3NA-210B at 4A continuous (no heatsink): `max_power: 0.64` for a 750W/120V bed.
+**Klipper configuration**: In `[heater_bed]`, set `heater_pin: PA3`.
 
 ### Bed thermistor
 
-The bed thermistor is an **NTC 100K B3950**, typically pre-installed on the silicone heater pad. It connects to the **TB header (pin PF3)** on the Octopus Pro via a **2-pin JST-XH** connector. Use **24AWG** wire, routed through the Z cable chain (**100cm** for all Trident sizes). Add a **thermal fuse rated 115–125°C** in series with the bed heater AC wiring as a hardware safety backup against thermal runaway.
+The bed thermistor is an **NTC 100K B3950**, typically pre-installed on the silicone heater pad. It connects to the **TB header (pin PF3)** on the Octopus Pro via a **2-pin JST-XH** connector. Use **24AWG** wire, routed through the Z cable chain (**100cm** for all Trident sizes). Add a **thermal fuse rated 115–125°C** as a hardware safety backup against thermal runaway. The fuse should be screwed directly into the aluminum bed plate or secured to the silicone heater with RTV silicone adhesive — not floating loose in the AC wiring run. Physical contact with the heated mass is what makes it respond to actual bed temperature rather than ambient air temperature.
 
 ---
 
@@ -123,15 +133,7 @@ CAN bus requires **exactly two 120Ω termination resistors**, one at each end of
 
 ### CAN bus speed
 
-All devices must use the **same CAN bus speed**. BTT precompiled firmware defaults to **1,000,000 bps (1 Mbit/s)**. Configure the Linux CAN interface on the Pi:
-
-```
-# /etc/network/interfaces.d/can0
-allow-hotplug can0
-iface can0 can static
-    bitrate 1000000
-    up ifconfig $IFACE txqueuelen 1024
-```
+All devices must use the **same CAN bus speed**. BTT precompiled firmware defaults to **1,000,000 bps (1 Mbit/s)**. For full CAN bus setup — interface configuration, UUID discovery, Katapult flashing, and Klipper config — follow **[canbus.esoterical.online](https://canbus.esoterical.online)**. It is exhaustive, actively maintained, and covers every common board combination including U2C + EBB36.
 
 ---
 
@@ -357,7 +359,7 @@ Use **silicone-jacketed, high-strand-count wire** for all moving applications. U
 | **Molex Microfit 3.0** | 3.0mm | 20–24AWG | 5A | Mid-wire disconnects (motors, heaters, endstops); EBB36 CAN+power input (2×2); CAN umbilical | IWISS IWS-3220M or Molex 63819-0000 |
 | **MX1.25** (JST MX) | 1.25mm | 26–28AWG | 1A | Knomi 2 power connector | Fine-pitch crimper or pre-made cable |
 | **GX16-4** | — | 18–22AWG | 5A | Optional umbilical disconnect at frame | Solder to pins |
-| **Wago 221** | — | 12–24AWG | 20A | All AC mains wire junctions | Tool-free lever operation. **No ferrules** — ferrules prevent the contact spring from gripping bare wire correctly and must not be used. **Obey the minimum strip length** — it is printed on the side of each connector body. Under-stripped wires make intermittent contact; over-stripped wires expose live conductor past the connector. |
+| **Wago 221** | — | 12–24AWG | 20A | All AC mains wire junctions | Tool-free lever operation. Accepts bare stranded wire and solid core wire. **Ferrules are not recommended** — most ferrules are too short to reach the correct insertion depth once the collar meets the connector body, and ferrule gauges can easily exceed the connector's maximum. If a wire already has a ferrule, remove it before inserting. **Obey the minimum strip length** — it is printed on the side of each connector body. Under-stripped wires make intermittent contact; over-stripped wires expose live conductor past the connector. |
 | **Bootlace ferrules** | — | 10–28AWG | Per gauge | All screw terminal connections (Octopus Pro power, EBB36 heater, PSU) | Self-adjusting ferrule pliers |
 | **Spade/ring terminals** | — | 12–18AWG | Per gauge | SSR screw terminals, PSU terminals, frame ground | Standard terminal crimper |
 | **USB-C** | — | — | — | Octopus Pro data, U2C data, ADXL345 data, Pi power, EBB36 firmware flash | — |
