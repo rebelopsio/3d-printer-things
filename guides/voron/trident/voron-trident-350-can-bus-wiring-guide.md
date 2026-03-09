@@ -12,7 +12,7 @@
 
 The recommended PSU is the **Mean Well LRS-200-24** (200W, 24V, 8.8A). For 230V regions, the **RSP-200-24** variant includes power factor correction and universal AC input. The LRS-200-24 has a physical **110V/230V selector switch** on the side — setting this incorrectly will destroy the PSU on first power-up.
 
-**Mains AC wiring** from the IEC C14 inlet to the PSU uses **16AWG (1.25mm²) minimum** stranded wire. Route Live (L) through the inlet's integrated fuse and rocker switch, then to the PSU L terminal. Neutral (N) goes directly to the PSU N terminal. Earth (PE/⏚) connects to the PSU earth terminal, then continues to the printer frame via a **serrated star washer** for reliable contact. Use **Wago 221-series** lever nuts for all AC junction points.
+**Mains AC wiring** from the IEC C14 inlet to the PSU uses **16AWG (1.25mm²) minimum** stranded wire. Route Live (L) through the inlet's integrated fuse and rocker switch, then to the PSU L terminal. Neutral (N) goes directly to the PSU N terminal. Earth (PE/⏚) connects to the PSU earth terminal, then continues to the printer frame via a **serrated star washer** for reliable contact. Use **Wago 221-series** lever nuts for all AC junction points. Two important rules for Wagos: do **not** use ferrules — the contact spring needs to grip bare stranded wire directly, and a ferrule prevents this. And obey the **minimum strip length** printed on the side of the connector body — each variant (221-412, 221-413, etc.) specifies a different length, typically 11mm for the 2-conductor version.
 
 | AC Component | Wire Gauge | Connector |
 |---|---|---|
@@ -61,7 +61,7 @@ Use a quality SSR: **Omron G3NA-210B-DC5** (10A) or **Crydom D2425** (25A). Chea
 - SSR AC output terminal (pin 2) → bed heater Live wire
 - AC Neutral connects directly to bed heater (bypasses SSR)
 - **Wire gauge**: **14AWG minimum** (12AWG recommended for 120V/750W = 6.25A)
-- Route AC wires separately from DC wiring; use Wago 221 connectors for junctions
+- Route AC wires separately from DC wiring; use Wago 221 connectors for junctions (bare wire only, no ferrules; observe strip length marked on connector side)
 
 **Klipper configuration**: In `[heater_bed]`, set `heater_pin: PA3`. Calculate `max_power` as SSR continuous rating divided by actual bed current. For the Omron G3NA-210B at 4A continuous (no heatsink): `max_power: 0.64` for a 750W/120V bed.
 
@@ -357,7 +357,7 @@ Use **silicone-jacketed, high-strand-count wire** for all moving applications. U
 | **Molex Microfit 3.0** | 3.0mm | 20–24AWG | 5A | Mid-wire disconnects (motors, heaters, endstops); EBB36 CAN+power input (2×2); CAN umbilical | IWISS IWS-3220M or Molex 63819-0000 |
 | **MX1.25** (JST MX) | 1.25mm | 26–28AWG | 1A | Knomi 2 power connector | Fine-pitch crimper or pre-made cable |
 | **GX16-4** | — | 18–22AWG | 5A | Optional umbilical disconnect at frame | Solder to pins |
-| **Wago 221** | — | 12–24AWG | 20A | All AC mains wire junctions | Tool-free lever operation |
+| **Wago 221** | — | 12–24AWG | 20A | All AC mains wire junctions | Tool-free lever operation. **No ferrules** — ferrules prevent the contact spring from gripping bare wire correctly and must not be used. **Obey the minimum strip length** — it is printed on the side of each connector body. Under-stripped wires make intermittent contact; over-stripped wires expose live conductor past the connector. |
 | **Bootlace ferrules** | — | 10–28AWG | Per gauge | All screw terminal connections (Octopus Pro power, EBB36 heater, PSU) | Self-adjusting ferrule pliers |
 | **Spade/ring terminals** | — | 12–18AWG | Per gauge | SSR screw terminals, PSU terminals, frame ground | Standard terminal crimper |
 | **USB-C** | — | — | — | Octopus Pro data, U2C data, ADXL345 data, Pi power, EBB36 firmware flash | — |
